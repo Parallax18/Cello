@@ -27,7 +27,9 @@ contract celonews {
         uint256 timestamp;
         
     }
-
+    // representing 1 cusd
+    uint256 internal ERC20_OFFSET = 1000000000000000000;
+    
     uint256 newsLength = 0;
     
     uint256 postPrice = 3;
@@ -61,10 +63,11 @@ contract celonews {
           IERC20Token(cUsdTokenAddress).transferFrom(
             msg.sender,
             agencyAddress,
-            postPrice
+            postPrice * ERC20_OFFSET
           ),    
           "This transaction could not be performed"
         );
+        uint256 time = block.timestamp;
         news[newsLength] = NewsItem(
             payable(msg.sender),
             _title,
@@ -73,9 +76,10 @@ contract celonews {
             _category,
             _author,
             _content,
-            block.timestamp
+            time
         );
         newsLength++;
+        emit News(msg.sender, _title, _excerpt, _imageUrl, _category, _author, _content, time);
     }
     
     function getNews(uint _index, bool _isRead) public view returns(
@@ -99,6 +103,17 @@ contract celonews {
             newsItem.author,
             newsItem.content,
             newsItem.timestamp
+        );
+    }
+
+    function tipAuthor(uint index, uint _tipamount) public payable{
+        require(
+          IERC20Token(cUsdTokenAddress).transferFrom(
+            msg.sender,
+            news[index].authorAddress,
+            _tipamount
+          ),    
+          "This transaction could not be performed"
         );
     }
     
