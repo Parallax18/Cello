@@ -32,9 +32,20 @@ const NewsDetails = props => {
           {/* post content */}
           <div className="post-content clearfix">
              <p>{props.newsItem.content}</p>
+             
           </div>
           {/* post bottom section */}
           <div className="post-bottom">
+            <div className="row d-flex align-items-right">
+              <div className="col-md-6 col-12 text-right text-md-start"></div>
+              <div className="col-md-6 col-12 text-right text-md-start">
+                <ul className="social-icons list-unstyled list-inline mb-0 float-md-end">
+                  <li className="list-inline-item"><a href='javascript:void(0)' onClick={() => props.likeNews(id)} ><i className="fa fa-thumbs-up" /></a></li>
+                  <li className="list-inline-item"><a href="javascript:void(0)" onClick={() => props.dislikeNews(id)} ><i className="fa fa-thumbs-down" /></a></li>
+                  <li className="list-inline-item"><a href="#">{props.newsItem.votes} vote(s)</a></li>
+                </ul>
+              </div>
+            </div>
             <div className="row d-flex align-items-center">
               <div className="col-md-6 col-12 text-center text-md-start">
                 {/* tags */}
