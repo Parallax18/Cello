@@ -22,7 +22,7 @@ const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
 
 
 function App() {
-  const [celoBalance, setCeloBalance] = useState(0);
+  // const [celoBalance, setCeloBalance] = useState(0);
   const [contract, setcontract] = useState(null);
   const [address, setAddress] = useState(null);
   const [kit, setKit] = useState(null);
@@ -63,6 +63,11 @@ function App() {
       getNews(false);
     } catch (error) {
       console.log(error);
+      const notification = notificationSystem.current;
+        notification.addNotification({
+          message: 'Failed to add news',
+          level: 'error'
+        })
     }
 
   }
@@ -153,12 +158,12 @@ function App() {
     });
     try {
       const balance = await kit.getTotalBalance(address);
-      const celoBalance = balance.CELO.shiftedBy(-ERC20_DECIMALS).toFixed(2);
+      // const celoBalance = balance.CELO.shiftedBy(-ERC20_DECIMALS).toFixed(2);
       const USDBalance = balance.cUSD.shiftedBy(-ERC20_DECIMALS).toFixed(2);
   
       const contract = new kit.web3.eth.Contract(news, contractAddress);
       setcontract(contract);
-      setCeloBalance(celoBalance);
+      // setCeloBalance(celoBalance);
       setcUSDBalance(USDBalance);
     } catch (error) {
       console.log(error);
