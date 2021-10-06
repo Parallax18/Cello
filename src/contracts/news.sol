@@ -105,6 +105,17 @@ contract celonews {
             newsItem.timestamp
         );
     }
+
+    function tipAuthor(uint index, uint _tipamount) public payable{
+        require(
+          IERC20Token(cUsdTokenAddress).transferFrom(
+            msg.sender,
+            news[index].authorAddress,
+            _tipamount
+          ),    
+          "This transaction could not be performed"
+        );
+    }
     
  
     
