@@ -34,7 +34,7 @@ contract celonews {
     
     mapping (uint => NewsItem) internal news;
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
-    address internal agencyAddress = 0xb7BF999D966F287Cd6A1541045999aD5f538D3c6;
+    // address internal agencyAddress = 0xb7BF999D966F287Cd6A1541045999aD5f538D3c6;
     
     event News(
         address authorAddress,
@@ -60,7 +60,7 @@ contract celonews {
         require(
           IERC20Token(cUsdTokenAddress).transferFrom(
             msg.sender,
-            agencyAddress,
+            address(this),
             postPrice
           ),    
           "This transaction could not be performed"
