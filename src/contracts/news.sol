@@ -14,7 +14,7 @@ interface IERC20Token {
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract celonews {
+contract Celo {
     
     struct NewsItem {
         address payable authorAddress;
@@ -24,31 +24,32 @@ contract celonews {
         string category;
         string author;
         string content;
+        uint votes;
         uint256 timestamp;
-        
     }
 
     uint256 newsLength = 0;
-    
     uint256 postPrice = 3;
+    uint256 likePrice = 1;
+
+    uint256 balance = 0;
     
     mapping (uint => NewsItem) internal news;
+
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
     address internal agencyAddress = 0xb7BF999D966F287Cd6A1541045999aD5f538D3c6;
     
-    event News(
-        address authorAddress,
-        string title,
-        string excerpt,
-        string imageUrl,
-        string category,
-        string author,
-        string content,
-        uint256 timestamp
+    event Like(
+        address Voter,
+        uint newID
+    );
+
+    event Dislike(
+        address Voter,
+        uint newID
     );
         
     function addNews(
-    
         string memory _title,
         string memory _excerpt,
         string memory _imageUrl,
@@ -56,15 +57,21 @@ contract celonews {
         string memory _author,
         string memory _content
     )public{
+        balance = IERC20Token(cUsdTokenAddress).balanceOf(msg.sender);
         // an author of a news post is required to pay a fee
         require(
-          IERC20Token(cUsdTokenAddress).transferFrom(
-            msg.sender,
-            agencyAddress,
-            postPrice
-          ),    
-          "This transaction could not be performed"
+          balance >= postPrice,
+          "Your balance is not enough to make the transaction"
         );
+        
+        require(
+            IERC20Token(cUsdTokenAddress).transferFrom(
+                msg.sender,
+                agencyAddress,
+                postPrice
+            )
+        );
+
         news[newsLength] = NewsItem(
             payable(msg.sender),
             _title,
@@ -73,12 +80,13 @@ contract celonews {
             _category,
             _author,
             _content,
+            0,
             block.timestamp
         );
         newsLength++;
     }
     
-    function getNews(uint _index, bool _isRead) public view returns(
+    function getNews(uint _index) public view returns(
         address payable,
         string memory,
         string memory,
@@ -86,6 +94,7 @@ contract celonews {
         string memory,
         string memory,
         string memory,
+        uint,
         uint256
     ){
         NewsItem storage newsItem = news[_index];
@@ -98,13 +107,40 @@ contract celonews {
             newsItem.category,
             newsItem.author,
             newsItem.content,
+            newsItem.votes,
             newsItem.timestamp
         );
     }
     
- 
+
+    function likeNews(uint _index) public payable {
+        require(
+            msg.sender != news[_index].authorAddress,
+            "You can not like your own post"
+        );
+        require(
+            IERC20Token(cUsdTokenAddress).transferFrom(
+                msg.sender,
+                news[_index].authorAddress,
+                likePrice
+            ),
+            "Donate the news failed."
+        );
+        news[_index].votes++;
+        emit Like(msg.sender, _index);
+    }
+
+    function dislikeNews(uint _index) public {
+        require(
+            msg.sender != news[_index].authorAddress,
+            "You can not dislike your own post"
+        );
+        require(news[_index].votes > 0, "Can not dislike the news has 0 vote(s).");
+        news[_index].votes--;
+        emit Dislike(msg.sender, _index);
+    }
     
-      function getNewsLength() public view returns (uint) {
+    function getNewsLength() public view returns (uint) {
         return (newsLength);
     }
     

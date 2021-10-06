@@ -17,7 +17,7 @@ import NewsDetails from './components/NewsDetails';
 
 const ERC20_DECIMALS = 18;
 
-const contractAddress = "0xc758f5786153600777A2101A15dd1abb397064ab";
+const contractAddress = "0xe64DCC436aB8b18Efe85f30A00ac5Ac4E9e29Fa5";
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
 
 
@@ -81,9 +81,9 @@ function App() {
 
     for (let index = 0; index < newsLength; index++) {
       let _newsP = new Promise(async (resolve, reject)=>{
-        let n = await contract.methods.getNews(index,isRead).call();
+        let n = await contract.methods.getNews(index).call();
 
-        let mainTime =  new Date(n[7] * 1000)
+        let mainTime =  new Date(n[8] * 1000)
         const mainYear = mainTime.getFullYear();
         const month = mainTime.getMonth()+1;
         const dt = mainTime.getDate();
@@ -96,6 +96,7 @@ function App() {
           category: n[4],
           author: n[5],
           content: n[6],
+          votes: n[7],
           timestamp: `${dt}/${month}/${mainYear}`
         });
 
@@ -145,7 +146,6 @@ function App() {
   };
 
   const getBalance = async () => {
-
     const notification = notificationSystem.current;
     notification.addNotification({
       message: 'We are getting your USD balance...',
@@ -167,9 +167,34 @@ function App() {
         level: 'error'
       });
     }
-
-
   };
+
+  const likeNews = async (_index)=>{
+    const cUSDContract = new kit.web3.eth.Contract(erc20, cUSDContractAddress);
+    try {
+      const likePrice = new BigNumber(1).shiftedBy(ERC20_DECIMALS).toString();
+
+      await cUSDContract.methods
+        .approve(contractAddress, likePrice)
+        .send({ from: address });
+
+      await contract.methods.likeNews(_index).send({ from: address });
+      getBalance();
+      getNews();
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  const dislikeNews = async (_index)=>{
+    try {
+      await contract.methods.dislikeNews(_index).send({ from: address });
+      getBalance();
+      getNews();
+    } catch (error) {
+      console.log({ error });
+    }
+  }
 
   return (
     <Router>
@@ -180,7 +205,7 @@ function App() {
         <News addNews={addToNews} news = {mainNews} />  
         </Route>
         <Route path = "/details/:id">
-        <NewsDetails getNews = {getNewsById} newsItem= {newsItem}/>
+        <NewsDetails getNews = {getNewsById} newsItem= {newsItem} dislikeNews={dislikeNews} likeNews={likeNews}/>
         </Route>
       </Switch>      
       <NotificationSystem ref={notificationSystem} />
