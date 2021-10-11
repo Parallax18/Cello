@@ -26,6 +26,8 @@ contract celonews {
         string content;
         uint256 timestamp;
         
+        uint256 views;
+        
     }
 
     uint256 newsLength = 0;
@@ -33,8 +35,9 @@ contract celonews {
     uint256 postPrice = 3;
     
     mapping (uint => NewsItem) internal news;
-    address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
-    address internal agencyAddress = 0xb7BF999D966F287Cd6A1541045999aD5f538D3c6;
+    address internal cUsdTokenAddress;
+    address internal agencyAddress;
+    address public adminAddress;
     
     event News(
         address authorAddress,
@@ -46,6 +49,19 @@ contract celonews {
         string content,
         uint256 timestamp
     );
+    
+    modifier onlyOwner(){
+        require(msg.sender == adminAddress, "Only admins can call this function");
+        _;
+    }
+    
+    constructor(){
+        agencyAddress = 0xb7BF999D966F287Cd6A1541045999aD5f538D3c6;
+        cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
+        adminAddress = msg.sender;
+    }
+    
+    
         
     function addNews(
     
@@ -73,12 +89,13 @@ contract celonews {
             _category,
             _author,
             _content,
-            block.timestamp
+            block.timestamp,
+            0
         );
         newsLength++;
     }
     
-    function getNews(uint _index, bool _isRead) public view returns(
+    function getNews(uint _index) public view returns(
         address payable,
         string memory,
         string memory,
@@ -102,8 +119,14 @@ contract celonews {
         );
     }
     
- 
+    // Dev : Admin can edit the content a news by passing in the id of the news and the content
+    function editNewsContent(uint _index, string memory _content) public onlyOwner {
+        NewsItem storage newsItem = news[_index];
+        newsItem.content = _content;
+        
+    }
     
+ 
       function getNewsLength() public view returns (uint) {
         return (newsLength);
     }
