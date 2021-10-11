@@ -40,7 +40,8 @@ function App() {
     if (kit && address) {
       return getBalance();
     } else {
-      console.log('no kit')
+      // console.log('no kit')
+      return
     }
   }, [kit, address]);
 
@@ -50,6 +51,8 @@ function App() {
       }
   }, [ contract])
 
+
+  // create a news post
   const addToNews = async (_title, _image, _category, _summary,_author, _content) => {
     const cUSDContract = new kit.web3.eth.Contract(erc20, cUSDContractAddress);
     try {
@@ -67,6 +70,8 @@ function App() {
 
   }
 
+
+  // get a news post using the ID
   const getNewsById = id=>{
     mainNews.map(news => {
       if(news.index == id){
@@ -75,6 +80,8 @@ function App() {
     });
   }
 
+
+  // get all the news available on the smart contract
   const getNews = async (isRead)=>{
     const newsLength = await contract.methods.getNewsLength().call();
     const _news = [];
@@ -108,6 +115,7 @@ function App() {
 
   }
 
+  // connect the Celo wallet
   const connectCeloWallet = async () => {
     if (window.celo) {
       try {
